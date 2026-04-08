@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>حل نظام المعادلات بالحذف (الجمع)</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg1: #1b3a2d;
+    --bg2: #24553e;
+    --bg3: #2d6b50;
+    --green-dark: #1a5c3a;
+    --green-mid: #2a7d52;
+    --green-accent: #3ab876;
+    --gold: #f0c040;
+    --gold2: #ffd966;
+    --cream: #f9fdf7;
+    --mint: #eaf7f0;
+    --coral: #e05c3a;
+    --blue-acc: #3a8fbf;
+    --border: #b8dfc8;
+    --text: #0e2a1c;
+    --step1-c: #1a6baa;
+    --step2-c: #b05c10;
+    --step3-c: #2a7d52;
+    --shadow: 0 6px 28px rgba(20,60,35,0.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Cairo', 'Tajawal', sans-serif;
+    background: linear-gradient(160deg, var(--bg1) 0%, var(--bg2) 50%, var(--bg3) 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: var(--text);
+  }
+
+  .app {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    text-align: center;
+    padding: 28px 20px 18px;
+    animation: fadeDown .6s ease;
+  }
+  .header h1 {
+    font-size: 1.85rem;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 2px 12px rgba(0,0,0,.35);
+  }
+  .header p { color: rgba(255,255,255,.75); font-size: .95rem; margin-top: 5px; }
+
+  .prog-wrap {
+    background: rgba(255,255,255,.15);
+    border-radius: 50px;
+    height: 10px;
+    margin: 14px 0 4px;
+    overflow: hidden;
+  }
+  .prog-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold2));
+    border-radius: 50px;
+    transition: width .5s ease;
+  }
+  .prog-labels {
+    display: flex;
+    justify-content: space-between;
+    color: rgba(255,255,255,.8);
+    font-size: .85rem;
+  }
+
+  /* ── BADGES ── */
+  .badges {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 14px 0;
+    flex-wrap: wrap;
+  }
+  .badge {
+    background: rgba(255,255,255,.14);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 50px;
+    padding: 7px 18px;
+    color: #fff;
+    font-weight: 700;
+    font-size: .88rem;
+  }
+  .badge span { color: var(--gold2); }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--cream);
+    border-radius: 26px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    animation: slideUp .5s ease;
+  }
+
+  /* card top strip */
+  .card-top {
+    background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+    padding: 20px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .q-label { color: rgba(255,255,255,.65); font-size: .8rem; letter-spacing: 1px; font-weight: 700; }
+  .q-num { font-size: 2rem; font-weight: 900; color: var(--gold2); line-height: 1; }
+
+  /* system equations display */
+  .sys-box {
+    background: linear-gradient(135deg, #fff8e0, #fff3c0);
+    border: 2.5px solid var(--gold);
+    border-radius: 14px;
+    padding: 12px 22px;
+    text-align: center;
+  }
+  .sys-eq {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text);
+    display: block;
+    line-height: 1.85;
+    font-family: 'Tajawal', sans-serif;
+    direction: ltr;
+    unicode-bidi: bidi-override;
+  }
+
+  /* ── STEPS ── */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    padding: 24px;
+  }
+  @media(max-width:620px){ .steps{ grid-template-columns:1fr; } }
+
+  .step-box {
+    background: #fff;
+    border-radius: 18px;
+    border: 2.5px solid var(--border);
+    padding: 18px 14px 22px;
+    transition: border-color .3s;
+    position: relative;
+  }
+  .step-box.done { border-color: var(--green-accent); background: #f3fdf6; }
+
+  .step-head {
+    text-align: center;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1.5px dashed var(--border);
+  }
+  .step-pill {
+    display: inline-block;
+    border-radius: 50px;
+    padding: 3px 12px;
+    font-size: .78rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .s1 .step-pill { background: var(--step1-c); }
+  .s2 .step-pill { background: var(--step2-c); }
+  .s3 .step-pill { background: var(--step3-c); }
+
+  .step-title-txt {
+    display: block;
+    font-weight: 800;
+    font-size: .92rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .s1 .step-title-txt { color: var(--step1-c); }
+  .s2 .step-title-txt { color: var(--step2-c); }
+  .s3 .step-title-txt { color: var(--step3-c); }
+
+  /* elimination layout */
+  .elim-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Tajawal', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+    direction: ltr;
+    unicode-bidi: bidi-override;
+  }
+  .elim-table td {
+    padding: 3px 6px;
+    white-space: nowrap;
+    text-align: center;
+  }
+  .elim-plus { color: var(--green-accent); font-size: 1.2rem; font-weight: 900; }
+  .elim-line {
+    border: none;
+    border-top: 2.5px solid var(--text);
+    margin: 4px 0 6px;
+    display: block;
+  }
+  .elim-cancel {
+    text-decoration: line-through;
+    color: #aaa;
+    font-size: .85em;
+  }
+
+  /* generic math row */
+  .mrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 7px 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-family: 'Tajawal', sans-serif;
+    color: var(--text);
+    direction: ltr;
+    unicode-bidi: bidi-override;
+  }
+  .mfixed { font-weight: 700; }
+  .mhl1 { color: var(--step1-c); font-weight: 800; }
+  .mhl2 { color: var(--step2-c); font-weight: 800; }
+  .mhl3 { color: var(--step3-c); font-weight: 800; }
+  .mdiv { border: none; border-top: 1.5px solid var(--border); margin: 6px 0; }
+
+  /* blanks */
+  .blank {
+    border: none;
+    border-bottom: 3px solid var(--blue-acc);
+    background: #eef6ff;
+    border-radius: 6px;
+    padding: 4px 6px;
+    min-width: 64px;
+    max-width: 110px;
+    text-align: center;
+    font-size: .98rem;
+    font-weight: 700;
+    font-family: 'Cairo', sans-serif;
+    color: var(--text);
+    outline: none;
+    transition: all .2s;
+    display: inline-block;
+    direction: ltr;
+  }
+  .blank:focus { background: #d8eeff; border-color: var(--green-dark); transform: scale(1.06); }
+  .blank.ok  { background: #e4f9ed; border-color: var(--green-accent); color: var(--green-dark); }
+  .blank.err { background: #fde9e4; border-color: var(--coral); color: var(--coral); animation: shake .4s; }
+  .blank:disabled { cursor: default; }
+
+  /* circle cancel badge */
+  .cancel-tag {
+    display: inline-block;
+    background: #ffe4e0;
+    color: var(--coral);
+    border-radius: 50px;
+    padding: 2px 10px;
+    font-size: .8rem;
+    font-weight: 800;
+    margin: 6px auto;
+    text-align: center;
+  }
+
+  /* ── ACTIONS ── */
+  .actions {
+    display: flex;
+    gap: 12px;
+    padding: 4px 24px 26px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .btn {
+    flex: 1; min-width: 140px; max-width: 220px;
+    padding: 13px 24px;
+    border-radius: 50px;
+    font-family: 'Cairo', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    border: none;
+    transition: all .2s;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn-check {
+    background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(26,92,58,.35);
+  }
+  .btn-check:hover { transform: translateY(-1px); box-shadow: 0 7px 22px rgba(26,92,58,.45); }
+  .btn-next {
+    background: linear-gradient(135deg, var(--gold), #f5a623);
+    color: var(--text);
+    box-shadow: 0 4px 16px rgba(240,192,64,.35);
+  }
+  .btn-next:hover { transform: translateY(-1px); }
+  .btn-next:disabled { opacity: .38; cursor: not-allowed; transform: none; }
+  .btn-reset { background: #fff; color: var(--coral); border: 2px solid var(--coral); }
+
+  /* ── FEEDBACK ── */
+  .fb {
+    display: none;
+    margin: 0 24px 16px;
+    padding: 11px 18px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: .97rem;
+    text-align: center;
+    animation: fadeIn .3s;
+  }
+  .fb.ok  { display: block; background: #e4f9ed; color: var(--green-dark); border: 1.5px solid var(--green-accent); }
+  .fb.err { display: block; background: #fde9e4; color: var(--coral); border: 1.5px solid var(--coral); }
+
+  /* ── FINAL ── */
+  .final {
+    display: none;
+    text-align: center;
+    padding: 50px 30px 40px;
+    animation: fadeIn .6s;
+  }
+  .final.show { display: block; }
+  .final-icon { font-size: 5rem; margin-bottom: 12px; }
+  .final h2 { font-size: 1.9rem; font-weight: 900; color: var(--text); margin-bottom: 10px; }
+  .final-score { font-size: 3.8rem; font-weight: 900; color: var(--gold); }
+  .final-stars { font-size: 2rem; letter-spacing: 5px; margin: 8px 0 6px; }
+  .final-msg { font-size: 1.05rem; color: var(--green-mid); font-weight: 700; margin-bottom: 24px; }
+
+  /* ── ANIMS ── */
+  @keyframes fadeDown { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes slideUp  { from{opacity:0;transform:translateY(28px)}  to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeIn   { from{opacity:0} to{opacity:1} }
+  @keyframes shake    { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>➕ حل نظام المعادلات بالحذف (الجمع)</h1>
+    <p>أكمل الفراغات خطوة بخطوة لإيجاد قيم x و y</p>
+    <div class="prog-wrap"><div class="prog-fill" id="progFill" style="width:20%"></div></div>
+    <div class="prog-labels">
+      <span id="progTxt">السؤال 1 من 5</span>
+      <span id="scoreTxt">النقاط: 0</span>
+    </div>
+  </div>
+
+  <div class="badges">
+    <div class="badge">✅ صحيح: <span id="cntOk">0</span></div>
+    <div class="badge">❌ خطأ: <span id="cntErr">0</span></div>
+    <div class="badge">🔢 المحاولات: <span id="cntTry">0</span></div>
+  </div>
+
+  <div class="card" id="card">
+    <div class="card-top" id="cardTop">
+      <div>
+        <div class="q-label">السؤال</div>
+        <div class="q-num" id="qNum">01</div>
+      </div>
+      <div id="sysBox"></div>
+    </div>
+
+    <div class="steps" id="stepsGrid"></div>
+    <div class="fb" id="fb"></div>
+    <div class="actions">
+      <button class="btn btn-check" onclick="check()">✔ تحقق من إجاباتي</button>
+      <button class="btn btn-next" id="nextBtn" onclick="next()" disabled>التالي ←</button>
+      <button class="btn btn-reset" onclick="reset()">↺ إعادة</button>
+    </div>
+
+    <div class="final" id="finalDiv">
+      <div class="final-icon" id="finalIcon">🏆</div>
+      <h2>أحسنت! انتهيت من النشاط</h2>
+      <div class="final-score" id="finalScore">0/5</div>
+      <div class="final-stars" id="finalStars">⭐⭐⭐⭐⭐</div>
+      <div class="final-msg" id="finalMsg">ممتاز جداً!</div>
+      <button class="btn btn-next" style="margin:0 auto;display:block;max-width:200px" onclick="restart()">🔄 إعادة النشاط</button>
+    </div>
+  </div>
+
+</div>
+<script>
+/* ────────────────────────────────────────────────────────
+   Each question defines three steps.
+   Each step has an array of "rows", each row being:
+     { type: 'elim' }  → the elimination (addition) table (rendered specially for step 1)
+     { type: 'cancel', text }  → the crossed-out variable tag
+     { type: 'math', parts }   → a flex row of text/blanks
+     { type: 'hr' }            → divider
+   Blanks: { b: true, ans: "...", w: charWidth }
+──────────────────────────────────────────────────────── */
+const Qs = [
+  /* Q1 : x + y = 8,  x − y = 2  →  x=5, y=3 */
+  {
+    sys: { e1:"x + y = 8", e2:"x − y = 2" },
+    s1: {
+      label:"الخطوة 1", sub:"نجمع المعادلتين",
+      rows:[
+        { type:'elim',
+          eq1:["x"," + ","y"," = ","8"],
+          eq2:["x"," − ","y"," = ","2"],
+          cancel:"y" },
+        { type:'math', parts:[ {b:true,ans:"2x",w:3}, " = ", {b:true,ans:"10",w:3} ] }
+      ]
+    },
+    s2: {
+      label:"الخطوة 2", sub:"نوجد قيمة x",
+      rows:[
+        { type:'math', parts:["2x = 10"] },
+        { type:'hr' },
+        { type:'math', parts:[ "x = 10 ÷ ", {b:true,ans:"2",w:2} ] },
+        { type:'math', parts:[ "x = ", {b:true,ans:"5",w:3} ] }
+      ]
+    },
+    s3: {
+      label:"الخطوة 3", sub:"نوجد قيمة y",
+      rows:[
+        { type:'math', parts:["x + y = 8"], cls:"mhl1" },
+        { type:'hr' },
+        { type:'math', parts:[ {b:true,ans:"5",w:3}, " + y = 8" ] },
+        { type:'math', parts:[ "y = 8 − ", {b:true,ans:"5",w:3} ] },
+        { type:'math', parts:[ "y = ", {b:true,ans:"3",w:3} ] }
+      ]
+    }
+  },
+
+  /* Q2 : 2x + y = 9,  x − y = 3  →  x=4, y=1 */
+  {
+    sys: { e1:"2x + y = 9", e2:"x − y = 3" },
+    s1: {
+      label:"الخطوة 1", sub:"نجمع المعادلتين",
+      rows:[
+        { type:'elim',
+          eq1:["2x"," + ","y"," = ","9"],
+          eq2:["x"," − ","y"," = ","3"],
+          cancel:"y" },
+        { type:'math', parts:[ {b:true,ans:"3x",w:4}, " = ", {b:true,ans:"12",w:4} ] }
+      ]
+    },
+    s2: {
+      label:"الخطوة 2", sub:"نوجد قيمة x",
+      rows:[
+        { type:'math', parts:["3x = 12"] },
+        { type:'hr' },
+        { type:'math', parts:[ "x = 12 ÷ ", {b:true,ans:"3",w:2} ] },
+        { type:'math', parts:[ "x = ", {b:true,ans:"4",w:3} ] }
+      ]
+    },
+    s3: {
+      label:"الخطوة 3", sub:"نوجد قيمة y",
+      rows:[
+        { type:'math', parts:["2x + y = 9"], cls:"mhl1" },
+        { type:'hr' },
+        { type:'math', parts:[ "2 × ", {b:true,ans:"4",w:3}, " + y = 9" ] },
+        { type:'math', parts:[ {b:true,ans:"8",w:3}, " + y = 9" ] },
+        { type:'math', parts:[ "y = ", {b:true,ans:"1",w:3} ] }
+      ]
+    }
+  },
+
+  /* Q3 : 3x + y = 11,  x − y = 1  →  x=3, y=2 */
+  {
+    sys: { e1:"3x + y = 11", e2:"x − y = 1" },
+    s1: {
+      label:"الخطوة 1", sub:"نجمع المعادلتين",
+      rows:[
+        { type:'elim',
+          eq1:["3x"," + ","y"," = ","11"],
+          eq2:["x"," − ","y"," = ","1"],
+          cancel:"y" },
+        { type:'math', parts:[ {b:true,ans:"4x",w:4}, " = ", {b:true,ans:"12",w:4} ] }
+      ]
+    },
+    s2: {
+      label:"الخطوة 2", sub:"نوجد قيمة x",
+      rows:[
+        { type:'math', parts:["4x = 12"] },
+        { type:'hr' },
+        { type:'math', parts:[ "x = 12 ÷ ", {b:true,ans:"4",w:2} ] },
+        { type:'math', parts:[ "x = ", {b:true,ans:"3",w:3} ] }
+      ]
+    },
+    s3: {
+      label:"الخطوة 3", sub:"نوجد قيمة y",
+      rows:[
+        { type:'math', parts:["3x + y = 11"], cls:"mhl1" },
+        { type:'hr' },
+        { type:'math', parts:[ "3 × ", {b:true,ans:"3",w:3}, " + y = 11" ] },
+        { type:'math', parts:[ {b:true,ans:"9",w:3}, " + y = 11" ] },
+        { type:'math', parts:[ "y = ", {b:true,ans:"2",w:3} ] }
+      ]
+    }
+  },
+
+  /* Q4 : x + 2y = 11,  3x − 2y = 1  →  x=3, y=4 */
+  {
+    sys: { e1:"x + 2y = 11", e2:"3x − 2y = 1" },
+    s1: {
+      label:"الخطوة 1", sub:"نجمع المعادلتين",
+      rows:[
+        { type:'elim',
+          eq1:["x"," + ","2y"," = ","11"],
+          eq2:["3x"," − ","2y"," = ","1"],
+          cancel:"2y" },
+        { type:'math', parts:[ {b:true,ans:"4x",w:4}, " = ", {b:true,ans:"12",w:4} ] }
+      ]
+    },
+    s2: {
+      label:"الخطوة 2", sub:"نوجد قيمة x",
+      rows:[
+        { type:'math', parts:["4x = 12"] },
+        { type:'hr' },
+        { type:'math', parts:[ "x = 12 ÷ ", {b:true,ans:"4",w:2} ] },
+        { type:'math', parts:[ "x = ", {b:true,ans:"3",w:3} ] }
+      ]
+    },
+    s3: {
+      label:"الخطوة 3", sub:"نوجد قيمة y",
+      rows:[
+        { type:'math', parts:["x + 2y = 11"], cls:"mhl1" },
+        { type:'hr' },
+        { type:'math', parts:[ {b:true,ans:"3",w:3}, " + 2y = 11" ] },
+        { type:'math', parts:[ "2y = ", {b:true,ans:"8",w:3} ] },
+        { type:'math', parts:[ "y = ", {b:true,ans:"4",w:3} ] }
+      ]
+    }
+  },
+
+  /* Q5 : x + 3y = 13,  5x − 3y = 11  →  x=4, y=3 */
+  {
+    sys: { e1:"x + 3y = 13", e2:"5x − 3y = 11" },
+    s1: {
+      label:"الخطوة 1", sub:"نجمع المعادلتين",
+      rows:[
+        { type:'elim',
+          eq1:["x"," + ","3y"," = ","13"],
+          eq2:["5x"," − ","3y"," = ","11"],
+          cancel:"3y" },
+        { type:'math', parts:[ {b:true,ans:"6x",w:4}, " = ", {b:true,ans:"24",w:4} ] }
+      ]
+    },
+    s2: {
+      label:"الخطوة 2", sub:"نوجد قيمة x",
+      rows:[
+        { type:'math', parts:["6x = 24"] },
+        { type:'hr' },
+        { type:'math', parts:[ "x = 24 ÷ ", {b:true,ans:"6",w:2} ] },
+        { type:'math', parts:[ "x = ", {b:true,ans:"4",w:3} ] }
+      ]
+    },
+    s3: {
+      label:"الخطوة 3", sub:"نوجد قيمة y",
+      rows:[
+        { type:'math', parts:["x + 3y = 13"], cls:"mhl1" },
+        { type:'hr' },
+        { type:'math', parts:[ {b:true,ans:"4",w:3}, " + 3y = 13" ] },
+        { type:'math', parts:[ "3y = ", {b:true,ans:"9",w:3} ] },
+        { type:'math', parts:[ "y = ", {b:true,ans:"3",w:3} ] }
+      ]
+    }
+  }
+];
+
+/* ── STATE ── */
+let qIdx=0, score=0, okCnt=0, errCnt=0, tryCnt=0, qDone=false;
+
+/* ── RENDER ROW ── */
+function rowHTML(row, qi, si, ri) {
+  if (row.type === 'hr') return '<hr class="mdiv">';
+
+  if (row.type === 'elim') {
+    // Show two equations with + sign and a line
+    const [a1,b1,c1,d1,e1] = row.eq1;
+    const [a2,b2,c2,d2,e2] = row.eq2;
+    const cv = row.cancel;
+    return `
+      <table class="elim-table">
+        <tr>
+          <td></td>
+          <td>${a1}</td><td>${b1}</td><td>${c1}</td><td>${d1}</td><td>${e1}</td>
+        </tr>
+        <tr>
+          <td class="elim-plus">+</td>
+          <td>${a2}</td><td>${b2}</td><td>${c2}</td><td>${d2}</td><td>${e2}</td>
+        </tr>
+      </table>
+      <span class="elim-line"></span>
+      <div style="text-align:center;margin-bottom:4px">
+        <span class="cancel-tag">❌ الحد <strong>${cv}</strong> يُحذف بالجمع</span>
+      </div>`;
+  }
+
+  // math row
+  const cls = row.cls || '';
+  let html = `<div class="mrow">`;
+  row.parts.forEach((p, pi) => {
+    if (typeof p === 'string') {
+      html += `<span class="mfixed ${cls}">${p}</span>`;
+    } else {
+      const id = `b_${qi}_${si}_${ri}_${pi}`;
+      html += `<input class="blank" type="text" id="${id}" data-ans="${p.ans}" size="${p.w}" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="؟">`;
+    }
+  });
+  html += `</div>`;
+  return html;
+}
+
+/* ── RENDER QUESTION ── */
+function render(idx) {
+  const q = Qs[idx];
+  qDone = false;
+  document.getElementById('nextBtn').disabled = true;
+  setFb('', '');
+
+  document.getElementById('qNum').textContent = String(idx+1).padStart(2,'0');
+  document.getElementById('sysBox').innerHTML = `
+    <div class="sys-box">
+      <span class="sys-eq">${q.sys.e1}</span>
+      <span class="sys-eq">${q.sys.e2}</span>
+    </div>`;
+
+  const grid = document.getElementById('stepsGrid');
+  grid.innerHTML = '';
+
+  const steps = [
+    { ...q.s1, sIdx:0, scls:'s1' },
+    { ...q.s2, sIdx:1, scls:'s2' },
+    { ...q.s3, sIdx:2, scls:'s3' }
+  ];
+
+  steps.forEach((step, si) => {
+    const box = document.createElement('div');
+    box.className = `step-box ${step.scls}`;
+    box.id = `sb_${si}`;
+
+    let inner = `
+      <div class="step-head">
+        <span class="step-pill">${si+1}</span>
+        <span class="step-title-txt">${step.label}</span>
+        <div style="font-size:.78rem;color:#888;margin-top:2px">${step.sub}</div>
+      </div>`;
+
+    step.rows.forEach((row, ri) => {
+      inner += rowHTML(row, idx, si, ri);
+    });
+
+    box.innerHTML = inner;
+    grid.appendChild(box);
+  });
+
+  // progress
+  document.getElementById('progFill').style.width = ((idx+1)/Qs.length*100)+'%';
+  document.getElementById('progTxt').textContent = `السؤال ${idx+1} من ${Qs.length}`;
+  updateStats();
+}
+
+/* ── CHECK ── */
+function norm(s){ return s.replace(/−/g,'-').replace(/×/g,'*').replace(/\s/g,'').toLowerCase(); }
+
+function check() {
+  if (qDone) return;
+  tryCnt++;
+  document.getElementById('cntTry').textContent = tryCnt;
+
+  const blanks = document.querySelectorAll('.blank:not([disabled])');
+  let allOk = true;
+
+  blanks.forEach(b => {
+    const v = b.value.trim();
+    if (!v) { allOk = false; return; }
+    if (norm(v) === norm(b.dataset.ans)) {
+      b.classList.remove('err'); b.classList.add('ok'); b.disabled = true;
+    } else {
+      b.classList.remove('ok'); b.classList.add('err'); allOk = false;
+    }
+  });
+
+  const allDone = [...document.querySelectorAll('.blank')].every(b=>b.classList.contains('ok'));
+
+  if (allDone) {
+    qDone = true; score += 10; okCnt++;
+    document.getElementById('cntOk').textContent = okCnt;
+    setFb('ok','🎉 ممتاز! جميع إجاباتك صحيحة!');
+    document.getElementById('nextBtn').disabled = false;
+    [0,1,2].forEach(i=>{ const b=document.getElementById(`sb_${i}`); if(b)b.classList.add('done'); });
+  } else {
+    errCnt++;
+    document.getElementById('cntErr').textContent = errCnt;
+    setFb('err','❌ بعض الإجابات غير صحيحة، راجعها وحاول مجدداً!');
+    setTimeout(()=>{
+      document.querySelectorAll('.blank.err').forEach(b=>{ b.classList.remove('err'); b.value=''; });
+    },1600);
+  }
+  updateStats();
+}
+
+function reset() {
+  document.querySelectorAll('.blank').forEach(b=>{ b.value=''; b.classList.remove('ok','err'); b.disabled=false; });
+  [0,1,2].forEach(i=>{ const b=document.getElementById(`sb_${i}`); if(b)b.classList.remove('done'); });
+  document.getElementById('nextBtn').disabled = true;
+  setFb('',''); qDone=false;
+}
+
+function next() {
+  qIdx++;
+  if (qIdx >= Qs.length) showFinal();
+  else render(qIdx);
+}
+
+function setFb(cls,txt) {
+  const el=document.getElementById('fb');
+  el.className='fb'+(cls?' '+cls:'');
+  el.textContent=txt;
+}
+
+function updateStats() {
+  document.getElementById('scoreTxt').textContent = `النقاط: ${score}`;
+}
+
+/* ── FINAL ── */
+function showFinal() {
+  document.getElementById('stepsGrid').style.display='none';
+  document.querySelector('.actions').style.display='none';
+  document.getElementById('fb').style.display='none';
+  document.getElementById('cardTop').style.display='none';
+  const fin=document.getElementById('finalDiv');
+  fin.classList.add('show');
+  const pct=okCnt/Qs.length;
+  document.getElementById('finalScore').textContent=`${okCnt} / ${Qs.length}`;
+  let s='',m='',ic='';
+  if(pct>=1){s='⭐⭐⭐⭐⭐';m='🏆 ممتاز جداً! أداء استثنائي!';ic='🥇';}
+  else if(pct>=.8){s='⭐⭐⭐⭐';m='👏 جيد جداً! استمر!';ic='🏆';}
+  else if(pct>=.6){s='⭐⭐⭐';m='👍 جيد! يمكنك الأفضل!';ic='🎖️';}
+  else{s='⭐⭐';m='💪 حاول مرة أخرى!';ic='📚';}
+  document.getElementById('finalStars').textContent=s;
+  document.getElementById('finalMsg').textContent=m;
+  document.getElementById('finalIcon').textContent=ic;
+}
+
+function restart() {
+  qIdx=0;score=0;okCnt=0;errCnt=0;tryCnt=0;qDone=false;
+  ['cntOk','cntErr','cntTry'].forEach(id=>document.getElementById(id).textContent=0);
+  document.getElementById('finalDiv').classList.remove('show');
+  document.getElementById('stepsGrid').style.display='';
+  document.querySelector('.actions').style.display='';
+  document.getElementById('fb').style.display='';
+  document.getElementById('cardTop').style.display='';
+  render(0);
+}
+
+document.addEventListener('keydown', e=>{ if(e.key==='Enter') check(); });
+render(0);
+</script>
+</body>
+</html>
